@@ -41,11 +41,15 @@ class serverSetup(commands.Cog):
         await ctx.send("Setting Up!")
         studentTxtChannels = [ ("hangout", "general discussion"),
                             ("request", "Request help from an instructor, use !help for more info"), 
-                            ("faq", "Ask general questions for peers or instructors to answer")]
+                            ("faq", "Ask general questions for peers or instructors to answer."),
+                            ("assignments", "Instructors will update this when new assignments are posted.")]
+        
         studentVcChannels = [("hangout", "Talk about whatever your heart desires"),
                             ("waitroom","Hangout until an instructor is able to help")]
+        
         instructorTxtChannels = [("instructor-hangout", "No students, no problems"),
                                 ("instructor-commands", "Please be patient with them")]
+        
         instructorVcChannels = [("studen-free-hangout", "Student free is stress free")]
         
         #Creates a clean slate for the server
@@ -55,6 +59,13 @@ class serverSetup(commands.Cog):
         # myCategories = ctx.guild.categories
         # for cat in myCategories:
         #     await cat.delete()
+
+        #Creates roles
+        await ctx.guild.create_role(name = "professor")
+        await ctx.guild.create_role(name = "TA")
+        await ctx.guild.create_role(name = "Student")
+
+        myRoles = ctx.guild.roles
 
 
         #instructor cate
@@ -81,10 +92,9 @@ class serverSetup(commands.Cog):
        
 
 
-        #Creates roles
 
-    
-    
+
+
     @commands.command(pass_context=True)
     async def delete(self,ctx):
         myText = ctx.guild.text_channels
@@ -99,6 +109,13 @@ class serverSetup(commands.Cog):
         myCategories = ctx.guild.categories
         for cat in myCategories:
             await cat.delete()
+
+        myRoles = ctx.guild.categories
+        for roles in myRoles:
+            await roles.delete()
+            await roles.delete()
+            await roles.delete()
+            await roles.delete()
 
 
 def setup(client):

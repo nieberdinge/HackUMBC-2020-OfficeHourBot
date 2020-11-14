@@ -1,12 +1,14 @@
   
 import discord
+import queue
 from discord.ext import commands 
 
 
-class queue(commands.Cog):
+class queues(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.ohQueue = [] 
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -28,9 +30,10 @@ class queue(commands.Cog):
 
         if ctx.message.channel.name == "request":
             await ctx.send("You are in the right channel!")
+            authID = "!reject "+str(ctx.message.author.id)
 
             embedVar = discord.Embed(title=ctx.message.author.name, description=studMsg, color=0xff0000)
-            #embedVar.add_field(name="Field1", value="hi", inline=False)
+            embedVar.add_field(name="To reject: ", value=authID, inline=False)
             #embedVar.add_field(name="Field2", value="hi2", inline=False)
             await ctx.guild.get_channel(instructorID).send(embed=embedVar)
         else:
@@ -40,7 +43,4 @@ class queue(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(queue(client))
-
-
-
+    client.add_cog(queues(client))
