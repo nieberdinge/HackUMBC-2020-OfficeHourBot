@@ -1,15 +1,5 @@
 # HackUMBC 2020 OfficeHourBot!
 
-## Google calendar thingy
-
-
-# Person setting up discord may need to generate and run their own (python3)
-# https://developers.google.com/calendar/quickstart/python
-
-    Client ID: 682385845494-efu3fkhjr822tg69a0fohuaravmaf125.apps.googleusercontent.com
-    Client Secret: R13_8judnDxMTGF5TYRDXRwz
-    API Key: AIzaSyC7GW5Qn9MQWC2TexqdLQ8Dx3_DK3UkD7Y
-
 ## What makes this so important?
     With the online transition of most classes, traditional
     way to hold office hours in a large classroom has ended.
