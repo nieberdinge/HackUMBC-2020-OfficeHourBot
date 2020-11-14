@@ -16,11 +16,19 @@
 
 
 ## How to install
-    1) Open Command Promt (CMD)
+    Step 1: 
+    1)Open Command Promt (CMD)
     2) Type python
     3) If you do not have python installed then it will take you to the microsoft store -> install this
     4) type "pip install discord.py" into cmd
-    5) Generate token and add it into `TOKENFILE.py`
+    Step 2:
+    1) Head to: https://discord.com/developers/applications
+    2) Login to your account (or create an account)
+    3) Create a new application (top right button); choose any name
+    4) Click on the newly made application and go to the "bot" top under settings
+    5) Click on "Add Bot"; USERNAME will be what is shown on the server
+    6) Click on the "Copy" button under token
+    7) Paste this token into the `TOKENFILE.py`
     
 
     
