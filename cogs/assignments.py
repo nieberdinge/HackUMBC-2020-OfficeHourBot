@@ -16,9 +16,14 @@ class assignments(commands.Cog):
     async def addAssign(self,ctx):
         #"!addAssignment 'name'; 'date'; 'description'
         #!addAssignment name: Proj1  - 11/14/20  desc: Create a bot
+
+        #parse out command
         if " " in ctx.message.content:
             assign = " ".join(ctx.message.content.split()[1:])
+        #split up command into sections
         assignArgs = assign.split(';')
+
+        #make sure only 3 commands given
         if(len(assignArgs) == 3):
             if ctx.message.channel.name == "instructor-commands":
                 assignID= ""
@@ -30,9 +35,11 @@ class assignments(commands.Cog):
                 embedVar.add_field(name="Due Date: ", value=assignArgs[1], inline=False)
                 await ctx.guild.get_channel(assignID).send(embed=embedVar)
             else:
-                await ctx.send("You are in the wrong channel idiot.")
+                await ctx.send("You are in the wrong channel idiot.", delete_after=5)
+                await ctx.message.delete()
         else:
-            await ctx.send("Incorrect format, please try again")
+            await ctx.send("Incorrect format, please try again", delete_after=15)
+            await ctx.message.delete()
         
     @commands.command(pass_context=True)
     async def clearAssign(self,ctx):

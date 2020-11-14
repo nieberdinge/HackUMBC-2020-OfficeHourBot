@@ -3,6 +3,7 @@
   
 import discord
 from discord.ext import commands 
+from discord.utils import get
 
 serverRoles = ["Professor", "TA", "Student"]
 
@@ -14,7 +15,7 @@ class serverSetup(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        print("TEMPLATE cog online.")
+        print("setup cog online.")
 
     # !setup
     #is_owner() at end
@@ -39,11 +40,18 @@ class serverSetup(commands.Cog):
 
         #TAPerms = discord.Permissions(mute_members = True, deafen_members = True, move_member = True, manage_nicknames = True)
         #Creates roles
-        for role in serverRoles:
-            await ctx.guild.create_role(name = role)
-        myRoles = ctx.guild.roles #[Everyone, Student, TA, Professor, HACKER!!, BOT]
 
-
+        await ctx.send("Before Role Creation")
+        await ctx.guild.create_role(name = "prof")
+        await ctx.guild.create_role(name = "TA")
+        await ctx.guild.create_role(name = "student")
+        await ctx.send("After Role Creation")
+        myRoles = ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
+        member = ctx.message.author
+        profRole = get(member.guild.roles, name="Professor")
+        taRole = get(member.guild.roles, name="TA")
+        stuRole = get(member.guild.roles, name="Student")
+        
         profPerms = discord.Permissions()
         profPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, administrator=True, manage_channels=True, 
                         manage_guild=True, add_reactions=True,view_audit_log=True, stream=True, read_messages=True, send_messages=True,
@@ -52,7 +60,7 @@ class serverSetup(commands.Cog):
                         change_nickname=True, manage_nicknames=True, manage_roles=True,manage_permisson=True, use_external_emojis=True,
                         manage_emojis=True)
         
-        await myRoles[3].edit(permissions = profPerms, hoist=True, color = 0xf74639)
+        await profRole.edit(permissions = profPerms, hoist=True, color = 0xf74639)
 
         taPerms = discord.Permissions()
         taPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, add_reactions=True, view_audit_log=True, 
@@ -61,25 +69,26 @@ class serverSetup(commands.Cog):
                         mute_members=True,deafen_members=True, move_members=True, change_nickname=True, manage_nicknames=True, manage_roles=True,
                         use_external_emojis=True,manage_emojis=True)
 
-        await myRoles[2].edit(permissions=taPerms, hoist=True, color = 0x0ce81a)
+        await taRole.edit(permissions=taPerms, hoist=True, color = 0x0ce81a)
 
         stuPerms = discord.Permissions()
         stuPerms.update(add_reactions=True, stream=True, read_messages=True, send_messages=True, send_tts_messages=True,
                         embed_links=True, attach_files=True, mention_everyone=True,connect=True, speak=True, 
                         change_nickname=True,use_external_emojis=True)
-        await myRoles[1].edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
-
+        await stuRole.edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
 
 
 
         newCat = await ctx.guild.create_category("Instructors")
-        await newCat.set_permissions(myRoles[1],read_messages=False)
+        await newCat.set_permissions(stuRole,read_messages=False)
+
         #student cate
-        await ctx.guild.create_category("Students")
+        newCat = await ctx.guild.create_category("Students")
 
         #creates office hours category
         newCat = await ctx.guild.create_category("Office-Hours")
-        await newCat.set_permissions(myRoles[1],read_messages=False)
+        await newCat.set_permissions(stuRole,read_messages=False)
+
 
         #creates authenticator 
         newCat = await ctx.guild.create_category("Authentication")
@@ -105,7 +114,7 @@ class serverSetup(commands.Cog):
             channel = await myCategories[1].create_text_channel(studChannel[0])
             await channel.edit(topic = studChannel[1])
             if channel.name == "assignments":
-                await channel.set_permissions(myRoles[1],read_messages=True,send_messages=False)
+                await channel.set_permissions(stuRole,read_messages=True,send_messages=False)
 
         for studChannel in studentVcChannels:
             channel = await myCategories[1].create_voice_channel(studChannel)

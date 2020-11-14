@@ -1,11 +1,12 @@
   
 import discord
 from discord.ext import commands 
+from discord.utils import get
 import random
 import string
 
-CODE = "CMSC202FA20"
-
+CODE = "TrueBit"
+TACODE = "PleaseChooseMeToWinThePrize"
 
 class authenticator(commands.Cog):
 
@@ -19,12 +20,23 @@ class authenticator(commands.Cog):
     @commands.command()
     async def authMe(self,ctx,*,uniqueId : str):
     #"Put a string under the function to add to !help"
-        if uniqueId == "":
-            await ctx.send("{} you did not enter a valid code".format(ctx.message.author.mention))
+        if ctx.message.channel == "authenticate-here":
+            if uniqueId == "":
+                await ctx.send("{} you did not enter a valid code".format(ctx.message.author.mention),delete_after=5)
+            else:
+                if uniqueId == CODE:
+                    member = ctx.message.author
+                    role = get(member.guild.roles, name="Student")
+                    await member.add_roles(role)
+                elif uniqueId == TACODE:
+                    member = ctx.message.author
+                    role = get(member.guild.roles, name="TA")
+                    await member.add_roles(role)
+                else:
+                    await ctx.send("{} you did not enter a valid code".format(ctx.message.author.mention),delete_after=5)
         else:
-            await ctx.send(uniqueId)
-            if uniqueId == CODE:
-                await ctx.send("Wow! I guess you are a studnet")
+            await ctx.send("You need to be in the authenticate-here channel",delete_after=5)
+        ctx.message.delete()
     
     @commands.command()
     @commands.has_role("Professor")
@@ -32,8 +44,6 @@ class authenticator(commands.Cog):
         file = open("studentList.txt",'w')
         
         for line in file.readlines():
-            print("messed up")
-            print(line[:-1]+"|"+self.generate())
             file.write(line[:-1]+"|"+self.generate())
         
         file.close()
