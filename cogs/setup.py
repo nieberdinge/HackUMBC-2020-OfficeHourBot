@@ -4,15 +4,6 @@
 import discord
 from discord.ext import commands 
 
-# - Text Channels:
-        # - instructor-general
-        # - instructor-commands
-        # - faq
-# - Voice Channels:
-        # - hangout
-        # - staff-hangout (hidden)
-        # - office-hours (hidden)
-
 serverRoles = ["Professor", "TA", "Student"]
 
 class serverSetup(commands.Cog):
@@ -25,35 +16,27 @@ class serverSetup(commands.Cog):
     async def on_ready(self):
         print("TEMPLATE cog online.")
 
-    @commands.command()
-    async def ping(self,ctx):
-        await ctx.send("Pong!")
-
-    @commands.command(pass_context=True)
-    async def hello(self, ctx):
-        embedVar = discord.Embed(title="Title", description="Desc", color=0x00ff00)
-        embedVar.add_field(name="Field1", value="hi", inline=False)
-        embedVar.add_field(name="Field2", value="hi2", inline=False)
-        await ctx.message.channel.send(embed=embedVar)
-
     # !setup
     #is_owner() at end
     @commands.command(pass_context=True)
     async def setup(self,ctx):
-    #"Put a string under the function to add to !help"
+        "- Builds the server from the ground up"
         await ctx.send("Setting Up!")
         studentTxtChannels = [ ("hangout", "general discussion"),
                             ("request", "Request help from an instructor, use !help for more info"), 
                             ("faq", "Ask general questions for peers or instructors to answer."),
                             ("assignments", "Instructors will update this when new assignments are posted.")]
         
-        studentVcChannels = [("hangout", "Talk about whatever your heart desires"),
-                            ("waitroom","Hangout until an instructor is able to help")]
+        studentVcChannels = ["hangout", "waitroom"]
         
         instructorTxtChannels = [("instructor-hangout", "No students, no problems"),
                                 ("instructor-commands", "Please be patient with them")]
         
-        instructorVcChannels = [("studen-free-hangout", "Student free is stress free")]
+        instructorVcChannels = ["studen-free-hangout"]
+        
+        OHTxtChannels = ["Office-Hours", "If you don't have a mic, type questions here"]
+        OHVcChannels = ["Office-Hours"]
+        
         
         #Creates a clean slate for the server
         # myText = ctx.guild.text_channels
@@ -69,44 +52,55 @@ class serverSetup(commands.Cog):
         for role in serverRoles:
             newRole = await ctx.guild.create_role(name = role)
             if role == "Professor":
-                newRole.permissions.update(administrator = True)
-            if role == "student":
-                newRole.permissions.update(read_messages = False)
+                await newRole.edit(all = True)
+            if role == "TA":
+                await newRole.edit(mute_members = True, deafen_members = True, move_member = True, manage_nicknames = True)
 
+
+        
         myRoles = ctx.guild.roles
+        #myRoles[1] = Students
+        #myRoles[2] = TA
+        #myRoles[3] = Professor
         #instructor cate
-        await ctx.guild.create_category("instructors")
+        newCat = await ctx.guild.create_category("Instructors")
+        await newCat.set_permissions(myRoles[1],read_messages=False)
         #student cate
-        await ctx.guild.create_category("students")
+        await ctx.guild.create_category("Students")
+        #creates office hours category
+        newCat = await ctx.guild.create_category("Office-Hours")
+        await newCat.set_permissions(myRoles[1],read_messages=False)
         myCategories = ctx.guild.categories
         
-
-
         #creates instructor text and voice channels
         for i in instructorTxtChannels:
             channel = await myCategories[0].create_text_channel(i[0])
             await channel.edit(topic = i[1])
+            
         for i in instructorVcChannels:
-            channel = await myCategories[0].create_voice_channel(i[0])
-            await channel.edit(topic = i[1])
+            channel = await myCategories[0].create_voice_channel(i)
         
         #creates student text and voice channels
-        for i in studentTxtChannels:
-            channel = await myCategories[1].create_text_channel(i[0])
-            await channel.edit(topic = i[1])
+        for studChannel in studentTxtChannels:
+            channel = await myCategories[1].create_text_channel(studChannel[0])
+            await channel.edit(topic = studChannel[1])
+            if channel.name == "assignments":
+                await channel.set_permissions(myRoles[1],read_messages=True,send_messages=False)
 
-        for i in studentVcChannels:
-            channel = await myCategories[1].create_voice_channel(i[0])
-            await channel.edit(topic = i[1])
-       
-        #for i in myRoles:
-        #  await ctx.send(i.name)
+        for studChannel in studentVcChannels:
+            channel = await myCategories[1].create_voice_channel(studChannel)
+
+       # channel = await myCategories[2].create_text_channel(OHTxtChannels[0])
+        #await channel.edit(topic = OHTxtChannels[1])
+        
+        #channel = await myCategories[2].create_voice_channel(OHVcChannels[0])
         
 
 
 
     @commands.command(pass_context=True)
     async def delete(self,ctx):
+        "- Will purge the entire server"
         myText = ctx.guild.text_channels
         myVoice = ctx.guild.voice_channels
         for text in myText:
@@ -124,6 +118,57 @@ class serverSetup(commands.Cog):
         for role in myRoles:
             if role.name in str(serverRoles):
                 await role.delete()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

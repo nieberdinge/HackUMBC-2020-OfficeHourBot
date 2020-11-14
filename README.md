@@ -46,9 +46,11 @@
             - office-hours (hidden)
     - Assignment list 
         - due dates 
+        - own cog
     - simple commands
         - help
     - FAQ
     - Private one on one command
     - easter eggs
     - delete commands after X time
+    - echo log 
