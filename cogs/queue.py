@@ -13,10 +13,13 @@ class queue(commands.Cog):
         print("Queue cog online.")
 
     @commands.command(pass_context=True)
-    async def join(self,ctx,msg = "No msg sent" ):
+    async def join(self,ctx):
         " -Join the queue"
         instructorID = ""
-        studnetID  = ""
+        studMsg = "No message given"
+        if " " in ctx.message.content:
+            studMsg = " ".join(ctx.message.content.split()[1:])
+        
         for channel in ctx.guild.channels:
             if channel.name == "instructor-commands":
                 instructorID = channel.id
@@ -26,7 +29,7 @@ class queue(commands.Cog):
         if ctx.message.channel.name == "request":
             await ctx.send("You are in the right channel!")
 
-            embedVar = discord.Embed(title=ctx.message.author.name, description=msg, color=0xff0000)
+            embedVar = discord.Embed(title=ctx.message.author.name, description=studMsg, color=0xff0000)
             #embedVar.add_field(name="Field1", value="hi", inline=False)
             #embedVar.add_field(name="Field2", value="hi2", inline=False)
             await ctx.guild.get_channel(instructorID).send(embed=embedVar)

@@ -42,9 +42,12 @@ class serverSetup(commands.Cog):
         studentTxtChannels = [ ("hangout", "general discussion"),
                             ("request", "Request help from an instructor, use !help for more info"), 
                             ("faq", "Ask general questions for peers or instructors to answer")]
-        studentVcChannels = ["hangout","waitroom"]
-        instructorTxtChannels = ["instructor-hangout","instructor-commands"]
-        instructorVcChannels = ["studen-free-hangout"]
+        studentVcChannels = [("hangout", "Talk about whatever your heart desires"),
+                            ("waitroom","Hangout until an instructor is able to help")]
+        instructorTxtChannels = [("instructor-hangout", "No students, no problems"),
+                                ("instructor-commands", "Please be patient with them")]
+        instructorVcChannels = [("studen-free-hangout", "Student free is stress free")]
+        
         #Creates a clean slate for the server
         # myText = ctx.guild.text_channels
         # for text in myText:
@@ -60,17 +63,21 @@ class serverSetup(commands.Cog):
         await ctx.guild.create_category("students")
         myCategories = ctx.guild.categories
         
+        #creates instructor text and voice channels
         for i in instructorTxtChannels:
-            await myCategories[0].create_text_channel(i[0])
+            channel = await myCategories[0].create_text_channel(i[0])
+            await channel.edit(topic = i[1])
         for i in instructorVcChannels:
-            await myCategories[0].create_voice_channel(i)
+            channel = await myCategories[0].create_voice_channel(i[0])
+            await channel.edit(topic = i[1])
         
-        #populates the categories with channels defined above
+        #creates student text and voice channels
         for i in studentTxtChannels:
-            await myCategories[1].create_text_channel(i)
+            channel = await myCategories[1].create_text_channel(i[0])
+            await channel.edit(topic = i[1])
         for i in studentVcChannels:
-            await myCategories[1].create_voice_channel(i)
-        
+            channel = await myCategories[1].create_voice_channel(i[0])
+            await channel.edit(topic = i[1])
        
 
 
