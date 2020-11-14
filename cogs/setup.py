@@ -1,5 +1,5 @@
-# This cog will populate a fresh server with different channels 
-# along with setting up roles / permissions
+# Author: Oliver Dininno
+# Co-Authors: Eddie Nieberding, Gabby Khan
   
 import discord
 from discord.ext import commands 
@@ -23,7 +23,7 @@ class serverSetup(commands.Cog):
         "- Builds the server from the ground up"
         await ctx.send("Setting Up!")
         studentTxtChannels = [ ("hangout", "general discussion"),
-                            ("request", "Request help from an instructor, use !help for more info"), 
+                            ("request", "Request help from an instructor, use !request_help for more info"), 
                             ("faq", "Ask general questions for peers or instructors to answer."),
                             ("assignments", "Instructors will update this when new assignments are posted.")]
         
@@ -32,45 +32,65 @@ class serverSetup(commands.Cog):
         instructorTxtChannels = [("instructor-hangout", "No students, no problems"),
                                 ("instructor-commands", "Please be patient with them")]
         
-        instructorVcChannels = ["studen-free-hangout"]
+        instructorVcChannels = ["student-free-hangout"]
         
-        OHTxtChannels = ["Office-Hours", "If you don't have a mic, type questions here"]
-        OHVcChannels = ["Office-Hours"]
-        
-        
-        #Creates a clean slate for the server
-        # myText = ctx.guild.text_channels
-        # for text in myText:
-        #     await text.delete()
-        # myCategories = ctx.guild.categories
-        # for cat in myCategories:
-        #     await cat.delete()
-        
+        OHTxtChannels = ["office-hours", "If you don't have a mic, type questions here"]
+        OHVcChannels = ["office-hours"]
 
-
+        #TAPerms = discord.Permissions(mute_members = True, deafen_members = True, move_member = True, manage_nicknames = True)
         #Creates roles
         for role in serverRoles:
-            newRole = await ctx.guild.create_role(name = role)
-            if role == "Professor":
-                await newRole.edit(all = True)
-            if role == "TA":
-                await newRole.edit(mute_members = True, deafen_members = True, move_member = True, manage_nicknames = True)
+            await ctx.guild.create_role(name = role)
+        myRoles = ctx.guild.roles #[Everyone, Student, TA, Professor, HACKER!!, BOT]
 
 
+        profPerms = discord.Permissions()
+        profPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, administrator=True, manage_channels=True, 
+                        manage_guild=True, add_reactions=True,view_audit_log=True, stream=True, read_messages=True, send_messages=True,
+                        send_tts_messages=True, manage_messages=True, embed_links=True, attach_files=True, read_message_history=True,
+                        mention_everyone=True,connect=True, speak=True,mute_members=True,deafen_members=True, move_members=True, 
+                        change_nickname=True, manage_nicknames=True, manage_roles=True,manage_permisson=True, use_external_emojis=True,
+                        manage_emojis=True)
         
-        myRoles = ctx.guild.roles
-        #myRoles[1] = Students
-        #myRoles[2] = TA
-        #myRoles[3] = Professor
-        #instructor cate
+        await myRoles[3].edit(permissions = profPerms, hoist=True, color = 0xf74639)
+
+        taPerms = discord.Permissions()
+        taPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, add_reactions=True, view_audit_log=True, 
+                        stream=True, read_messages=True, send_messages=True, send_tts_messages=True, manage_messages=True, 
+                        embed_links=True, attach_files=True, read_message_history=True,mention_everyone=True,connect=True, speak=True,
+                        mute_members=True,deafen_members=True, move_members=True, change_nickname=True, manage_nicknames=True, manage_roles=True,
+                        use_external_emojis=True,manage_emojis=True)
+
+        await myRoles[2].edit(permissions=taPerms, hoist=True, color = 0x0ce81a)
+
+        stuPerms = discord.Permissions()
+        stuPerms.update(add_reactions=True, stream=True, read_messages=True, send_messages=True, send_tts_messages=True,
+                        embed_links=True, attach_files=True, mention_everyone=True,connect=True, speak=True, 
+                        change_nickname=True,use_external_emojis=True)
+        await myRoles[1].edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
+
+
+
+
         newCat = await ctx.guild.create_category("Instructors")
         await newCat.set_permissions(myRoles[1],read_messages=False)
         #student cate
         await ctx.guild.create_category("Students")
+
         #creates office hours category
         newCat = await ctx.guild.create_category("Office-Hours")
         await newCat.set_permissions(myRoles[1],read_messages=False)
+
+        #creates authenticator 
+        newCat = await ctx.guild.create_category("Authentication")
+        for role in myRoles:
+            await newCat.set_permissions(role,read_messages=False)
+        await newCat.create_text_channel("authenticate-here")
+        
+        
+        
         myCategories = ctx.guild.categories
+   
         
         #creates instructor text and voice channels
         for i in instructorTxtChannels:
@@ -90,10 +110,10 @@ class serverSetup(commands.Cog):
         for studChannel in studentVcChannels:
             channel = await myCategories[1].create_voice_channel(studChannel)
 
-       # channel = await myCategories[2].create_text_channel(OHTxtChannels[0])
-        #await channel.edit(topic = OHTxtChannels[1])
+        channel = await myCategories[2].create_text_channel(OHTxtChannels[0])
+        await channel.edit(topic = OHTxtChannels[1])
         
-        #channel = await myCategories[2].create_voice_channel(OHVcChannels[0])
+        channel = await myCategories[2].create_voice_channel(OHVcChannels[0])
         
 
 
@@ -107,7 +127,7 @@ class serverSetup(commands.Cog):
             if text.name != "general":
                 await text.delete()
         for voice in myVoice:
-            if voice.name != "General":
+            if voice.name != "general":
                 await voice.delete()
 
         myCategories = ctx.guild.categories
@@ -120,56 +140,36 @@ class serverSetup(commands.Cog):
                 await role.delete()
 
 
+    @commands.command(pass_context=True)
+    async def perms(self,ctx):
+        "test"
+        await ctx.send("Setting up permissions!")
+        myRoles = ctx.guild.roles #[Everyone, Student, TA, Professor, HACKER!!, BOT]
 
+        profPerms = discord.Permissions()
+        profPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, administrator=True, manage_channels=True, 
+                        manage_guild=True, add_reactions=True,view_audit_log=True, stream=True, read_messages=True, send_messages=True,
+                        send_tts_messages=True, manage_messages=True, embed_links=True, attach_files=True, read_message_history=True,
+                        mention_everyone=True,connect=True, speak=True,mute_members=True,deafen_members=True, move_members=True, 
+                        change_nickname=True, manage_nicknames=True, manage_roles=True,manage_permisson=True, use_external_emojis=True,
+                        manage_emojis=True)
+        
+        await myRoles[3].edit(permissions = profPerms, hoist=True, color = 0xf74639)
 
+        taPerms = discord.Permissions()
+        taPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, add_reactions=True, view_audit_log=True, 
+                        stream=True, read_messages=True, send_messages=True, send_tts_messages=True, manage_messages=True, 
+                        embed_links=True, attach_files=True, read_message_history=True,mention_everyone=True,connect=True, speak=True,
+                        mute_members=True,deafen_members=True, move_members=True, change_nickname=True, manage_nicknames=True, manage_roles=True,
+                        use_external_emojis=True,manage_emojis=True)
 
+        await myRoles[2].edit(permissions=taPerms, hoist=True, color = 0x0ce81a)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        stuPerms = discord.Permissions()
+        stuPerms.update(add_reactions=True, stream=True, read_messages=True, send_messages=True, send_tts_messages=True,
+                        embed_links=True, attach_files=True, mention_everyone=True,connect=True, speak=True, 
+                        change_nickname=True,use_external_emojis=True)
+        await myRoles[1].edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
 
 
 def setup(client):
