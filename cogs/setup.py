@@ -40,17 +40,14 @@ class serverSetup(commands.Cog):
 
         #TAPerms = discord.Permissions(mute_members = True, deafen_members = True, move_member = True, manage_nicknames = True)
         #Creates roles
-
-        await ctx.send("Before Role Creation")
-        await ctx.guild.create_role(name = "prof")
-        await ctx.guild.create_role(name = "TA")
-        await ctx.guild.create_role(name = "student")
-        await ctx.send("After Role Creation")
+        for role in serverRoles:
+            await ctx.guild.create_role(name = role)
         myRoles = ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
         member = ctx.message.author
         profRole = get(member.guild.roles, name="Professor")
         taRole = get(member.guild.roles, name="TA")
         stuRole = get(member.guild.roles, name="Student")
+        everyRole = get(member.guild.roles, name="@everyone")
         
         profPerms = discord.Permissions()
         profPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, administrator=True, manage_channels=True, 
@@ -81,19 +78,27 @@ class serverSetup(commands.Cog):
 
         newCat = await ctx.guild.create_category("Instructors")
         await newCat.set_permissions(stuRole,read_messages=False)
+        await newCat.set_permissions(everyRole,read_messages=False)
+        await newCat.set_permissions(taRole,read_messages=True)
 
         #student cate
         newCat = await ctx.guild.create_category("Students")
+        await newCat.set_permissions(everyRole,read_messages=False)
+        await newCat.set_permissions(stuRole,read_messages=True)
+        await newCat.set_permissions(taRole,read_messages=True)
 
         #creates office hours category
         newCat = await ctx.guild.create_category("Office-Hours")
         await newCat.set_permissions(stuRole,read_messages=False)
+        await newCat.set_permissions(everyRole,read_messages=False)
+        await newCat.set_permissions(taRole,read_messages=True)
 
 
         #creates authenticator 
         newCat = await ctx.guild.create_category("Authentication")
         for role in myRoles:
-            await newCat.set_permissions(role,read_messages=False)
+            if role != everyRole:
+                await newCat.set_permissions(role,read_messages=False)
         await newCat.create_text_channel("authenticate-here")
         
         
@@ -179,6 +184,10 @@ class serverSetup(commands.Cog):
                         embed_links=True, attach_files=True, mention_everyone=True,connect=True, speak=True, 
                         change_nickname=True,use_external_emojis=True)
         await myRoles[1].edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
+
+    @commands.command(pass_context=True)
+    async def shutdown(ctx, extension):
+        await ctx.bot.logout()
 
 
 def setup(client):
