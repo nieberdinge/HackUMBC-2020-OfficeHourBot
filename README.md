@@ -15,7 +15,7 @@
     lives easier. 
 
 
-## How to install
+## How to Install
     Step 1: 
     1)Open Command Promt (CMD)
     2) Type python
