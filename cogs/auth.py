@@ -20,7 +20,7 @@ class authenticator(commands.Cog):
     @commands.command()
     async def authMe(self,ctx,*,uniqueId : str):
     #"Put a string under the function to add to !help"
-        if ctx.message.channel == "authenticate-here":
+        if ctx.message.channel.name == "authenticate-here":
             if uniqueId == "":
                 await ctx.send("{} you did not enter a valid code".format(ctx.message.author.mention),delete_after=5)
             else:
@@ -36,7 +36,7 @@ class authenticator(commands.Cog):
                     await ctx.send("{} you did not enter a valid code".format(ctx.message.author.mention),delete_after=5)
         else:
             await ctx.send("You need to be in the authenticate-here channel",delete_after=5)
-        ctx.message.delete()
+        await ctx.message.delete()
     
     @commands.command()
     @commands.has_role("Professor")

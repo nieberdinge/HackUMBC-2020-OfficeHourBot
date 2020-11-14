@@ -20,12 +20,13 @@ class serverSetup(commands.Cog):
     # !setup
     #is_owner() at end
     @commands.command(pass_context=True)
+    @commands.is_owner()
     async def setup(self,ctx):
         "- Builds the server from the ground up"
         await ctx.send("Setting Up!")
         studentTxtChannels = [ ("hangout", "general discussion"),
                             ("request", "Request help from an instructor, use !request_help for more info"), 
-                            ("faq", "Ask general questions for peers or instructors to answer."),
+                            ("questions", "Ask general questions for peers or instructors to answer."),
                             ("assignments", "Instructors will update this when new assignments are posted.")]
         
         studentVcChannels = ["hangout", "waitroom"]
@@ -35,15 +36,14 @@ class serverSetup(commands.Cog):
         
         instructorVcChannels = ["student-free-hangout"]
         
-        OHTxtChannels = ["office-hours", "If you don't have a mic, type questions here"]
-        OHVcChannels = ["office-hours"]
-
-        #TAPerms = discord.Permissions(mute_members = True, deafen_members = True, move_member = True, manage_nicknames = True)
-        #Creates roles
+       
+        #Creates roles from the roles list
         for role in serverRoles:
             await ctx.guild.create_role(name = role)
         myRoles = ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
         member = ctx.message.author
+
+        #creates objects of each role for easy access
         profRole = get(member.guild.roles, name="Professor")
         taRole = get(member.guild.roles, name="TA")
         stuRole = get(member.guild.roles, name="Student")
@@ -74,38 +74,30 @@ class serverSetup(commands.Cog):
                         change_nickname=True,use_external_emojis=True)
         await stuRole.edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
 
-
-
+        #Creates instructor Category and sets permissions
         newCat = await ctx.guild.create_category("Instructors")
         await newCat.set_permissions(stuRole,read_messages=False)
         await newCat.set_permissions(everyRole,read_messages=False)
         await newCat.set_permissions(taRole,read_messages=True)
 
-        #student cate
+        #Creates Students Category and sets permissions
         newCat = await ctx.guild.create_category("Students")
         await newCat.set_permissions(everyRole,read_messages=False)
         await newCat.set_permissions(stuRole,read_messages=True)
         await newCat.set_permissions(taRole,read_messages=True)
 
-        #creates office hours category
-        newCat = await ctx.guild.create_category("Office-Hours")
-        await newCat.set_permissions(stuRole,read_messages=False)
-        await newCat.set_permissions(everyRole,read_messages=False)
-        await newCat.set_permissions(taRole,read_messages=True)
 
-
-        #creates authenticator 
+        #Creates Authentication Category and sets permissions
         newCat = await ctx.guild.create_category("Authentication")
         for role in myRoles:
             if role != everyRole:
                 await newCat.set_permissions(role,read_messages=False)
         await newCat.create_text_channel("authenticate-here")
-        
+        await newCat.edit(topic = "!authMe [code from instructor]")
         
         
         myCategories = ctx.guild.categories
-   
-        
+          
         #creates instructor text and voice channels
         for i in instructorTxtChannels:
             channel = await myCategories[0].create_text_channel(i[0])
@@ -124,14 +116,7 @@ class serverSetup(commands.Cog):
         for studChannel in studentVcChannels:
             channel = await myCategories[1].create_voice_channel(studChannel)
 
-        channel = await myCategories[2].create_text_channel(OHTxtChannels[0])
-        await channel.edit(topic = OHTxtChannels[1])
-        
-        channel = await myCategories[2].create_voice_channel(OHVcChannels[0])
-        
-
-
-
+    
     @commands.command(pass_context=True)
     async def delete(self,ctx):
         "- Will purge the entire server"
@@ -185,9 +170,6 @@ class serverSetup(commands.Cog):
                         change_nickname=True,use_external_emojis=True)
         await myRoles[1].edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
 
-    @commands.command(pass_context=True)
-    async def shutdown(ctx, extension):
-        await ctx.bot.logout()
 
 
 def setup(client):
