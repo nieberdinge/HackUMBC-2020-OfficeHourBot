@@ -12,7 +12,7 @@
     a hassle to have to change to other applications multiple times a day.
 
     This is why we wanted to create a fully integrated bot that makes everyone's
-    lives easier.
+    lives easier. 
 
 
 ## How to install
@@ -53,4 +53,4 @@
     - Private one on one command
     - easter eggs
     - delete commands after X time
-    - echo log 
+    - echo log gonna be dank
