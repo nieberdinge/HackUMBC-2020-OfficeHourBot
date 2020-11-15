@@ -197,8 +197,8 @@ class queues(commands.Cog):
                 studentMember = self.ohQueue.pop(0)
                 self.ohMsg.pop(0)
                 
-                if self.priority == True:
-                    self.tick(studentMember.id)
+                
+                self.tick(studentMember.id)
 
                 member = ctx.message.author
                 ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
