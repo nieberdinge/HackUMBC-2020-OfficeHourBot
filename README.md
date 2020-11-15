@@ -91,26 +91,4 @@
         - !help
             - Shows student commands in discord
 
-## Video steps
-    - start with new guild
-    - call setup command
-    - show authenticate
-    - show office hours
-        - join
-        - accept
-        - reject
-    - close
-    - lecture
-    - private
-
-## Showcase Order
-    - Fresh Server
-    - Showcase role Auth by changing role with discord
-    - Show help command
-    - Talk about Oh Start and then p-queue option
-    - Accept student
-    - Deny next student
-    - Add assignment
-    - Show student view of assignment
-
 ![](Octocatgif.gif)
