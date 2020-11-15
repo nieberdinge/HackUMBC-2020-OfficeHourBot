@@ -92,8 +92,8 @@ class serverSetup(commands.Cog):
         for role in myRoles:
             if role != everyRole:
                 await newCat.set_permissions(role,read_messages=False)
-        await newCat.create_text_channel("authenticate-here")
-        await newCat.edit(topic = "!authMe [code from instructor]")
+        channel = await newCat.create_text_channel("authenticate-here")
+        await channel.edit(topic = "!authMe [code from instructor]")
         
         
         myCategories = ctx.guild.categories

@@ -26,27 +26,32 @@ class queues(commands.Cog):
     async def startOh(self,ctx):
         if ctx.message.channel.name == "instructor-commands":
             ta = ctx.message.author
-            if ta.id not in self.taOnDuty:
-                if len(self.taOnDuty) == 0:
-                    channel = get(ta.guild.channels,name="request")
-                    embedVar = discord.Embed(title="Office hours are open!", description="Use !join [reason] to join", color=0x00ff00)
-                    await channel.send(embed=embedVar)    
-                self.taOnDuty.append(ta.id)
-                await ctx.send("You have checking into office hours!",delete_after=5)
+            #no one is in office hours
+            if len(self.taOnDuty) == 0:
+                channel = get(ta.guild.channels,name="request")
+                embedVar = discord.Embed(title="Office hours are open!", description="Use !join [reason] to join", color=0x00ff00)
+                await channel.send(embed=embedVar)
+                self.taOnDuty.append(ta)
+                await ctx.send("You have checked into office hours!",delete_after=5)
+            #someone else is in office hours
+            elif ta not in self.taOnDuty:
+                self.taOnDuty.append(ta)
+                await ctx.send("You have checked into office hours!",delete_after=5) 
+            # you are already in office hours  
             else:
                 await ctx.send("You are already in the office hours")
         else:
             await ctx.send("Please move to the 'instructor-commands' channel",delete_after=5)
             await ctx.message.delete()
 
-    ## Ends Office Hours
+    ## Ends Office Hours for specific TA
     @commands.command(pass_context=True)
     @commands.has_any_role('Professor','TA')
     async def endOh(self,ctx):
         if ctx.message.channel.name == "instructor-commands":
             ta = ctx.message.author
-            if ta.id in self.taOnDuty:
-                self.taOnDuty.remove(ta.id)
+            if ta in self.taOnDuty:
+                self.taOnDuty.remove(ta)
                 await ctx.send("You have checked out of office hours!", delete_after=5)
                 
                 #There are no more TAs on duty
@@ -67,13 +72,13 @@ class queues(commands.Cog):
             await ctx.send("Please move to the 'instructor-commands' channel",delete_after=5)
             await ctx.message.delete()
 
-    ## Accept a Students Plea for Help
+    ## Accept a Students Plea for Help and sets permissions
     @commands.command(pass_context=True)
     @commands.has_any_role('Professor','TA')
     async def accept(self,ctx):
         if ctx.message.channel.name == "instructor-commands":
             ta = ctx.message.author
-            if ta.id in self.taOnDuty:
+            if ta in self.taOnDuty:
                 message = self.ohMsg.pop(0)
                 studentMember = self.ohQueue.pop(0)
                 
@@ -121,23 +126,31 @@ class queues(commands.Cog):
             else:
                 if ctx.message.channel.name == "instructor-commands":
                     studentID = int(msg[1])
-                    
-                    #removes unused items
-                    msg.pop(0)
-                    msg.pop(0)
-                    msg = " ".join(msg)
-                    studMsg = "you are being removed from the queue for the reason: "+msg
-                    rejectionId = self.ohQueue.index(studentID)
+                    noPosition = " You are not in the queue."
+                    index = -1
+                    #looks through queue to find student
+                    for x in range(len(self.ohQueue)):
+                        if self.ohQueue[x].id == studentID:
+                            index = x
 
-                    #message returns user not other thing
-                    memId = self.ohQueue[rejectionId]
-                    guildId = await ctx.guild.fetch_member(studentID)
-                    await guildId.send(studMsg)
+                    if index == -1:
+                        await ctx.send("You typed in the id wrong. Try again.")
+                    else:
+                        #removes unused items and sends DM to student why
+                        msg.pop(0)
+                        msg.pop(0)
+                        msg = " ".join(msg)
+                        studMsg = "you are being removed from the queue for the reason:\n"+msg
 
-                    await self.ohMsg[rejectionId].delete()
-                    await ctx.message.delete()
-                    self.ohMsg.pop(rejectionId)
-                    self.ohQueue.pop(rejectionId)
+                        #message returns user not other thing
+                        memId = self.ohQueue[index]
+                        guildId = await ctx.guild.fetch_member(studentID)
+                        await guildId.send(studMsg)
+
+                        await self.ohMsg[index].delete()
+                        await ctx.message.delete()
+                        self.ohMsg.pop(index)
+                        self.ohQueue.pop(index)
                 else:
                     await ctx.send("You are in the wrong channel. Please use the instructor-commands channel.")
         else:
@@ -149,7 +162,7 @@ class queues(commands.Cog):
     @commands.has_any_role('Professor','TA',"Students")
     async def join(self,ctx):
         " -Join the queue"
-        if ctx.message.channel.name == "instructor-commands":
+        if ctx.message.channel.name == "request":
             if len(self.taOnDuty) > 0:
                 instructorID = ""
                 studMsg = "No message given"
@@ -195,53 +208,48 @@ class queues(commands.Cog):
     async def leave(self,ctx):
         "-Lets the student leave the queue if they would like to"
         if ctx.message.channel.name == "request":
-            noPosition = "You are not in the queue."
-            index = 0
-            # do all of this to make sure that the user is in the queue
-            try:
-                index = self.ohQueue.index(ctx.message.author.id)
-            except ValueError: 
-                await ctx.send(ctx.message.author.mention + noPosition)
-                index = -1
+            userId = ctx.message.author.id 
+            noPosition = " You are not in the queue."
+            index = -1
+            for x in range(len(self.ohQueue)):
+                if self.ohQueue[x].id == userId:
+                    index = x
             if index != -1:
                 # finds the student ID, gives a message and finsd rejectionID
                 studentID = ctx.message.author.id
                 studMsg = "You have decided to leave the queue!"
-                rejectionId = self.ohQueue.index(studentID)
 
                 #message returns user not other thing
-                print(self.ohQueue[rejectionId])
-                memId = self.ohQueue[rejectionId]
                 guildId = await ctx.guild.fetch_member(studentID)
                 await guildId.send(studMsg)
-                print(guildId)
 
-                await self.ohMsg[rejectionId].delete()
-                await ctx.message.delete()
-                self.ohMsg.pop(rejectionId)
-                self.ohQueue.pop(rejectionId)
+                await self.ohMsg[index].delete()
+                self.ohMsg.pop(index)
+                self.ohQueue.pop(index)
+            else:
+                await ctx.send("{} you are not in the queue".format(ctx.message.author.mention))
         else:
             await ctx.send("Please move to the 'request' channel",delete_after=5)
-            await ctx.message.delete()
+        await ctx.message.delete()
 
     ## Shows a Student Their Position in the Queue
     @commands.command(pass_context=True)
     @commands.has_any_role('Professor','TA',"Students")
     async def position(self,ctx):
-        "-Returns the position that you are in"
         if ctx.message.channel.name == "request":
+            userId = ctx.message.author.id 
             noPosition = " You are not in the queue."
-            index = 0
-            try:
-                index = self.ohQueue.index(ctx.message.author.id)
-            except ValueError: 
-                await ctx.send(ctx.message.author.mention + noPosition)
-                index = -1
+            index = -1
+            for x in range(len(self.ohQueue)):
+                if self.ohQueue[x].id == userId:
+                    index = x
             if index != -1:
                 await ctx.send(ctx.message.author.mention + ", you are number {} in the queue.".format(index+1))
+            else:
+                await ctx.send("{} you are not in the queue".format(ctx.message.author.mention))
         else:
             await ctx.send("Please move to the 'request' channel",delete_after=5)
-            await ctx.message.delete()
+        await ctx.message.delete()
 
     ## Closes a Temporary Category and it's Channels
     @commands.command(pass_context=True)
@@ -269,6 +277,27 @@ class queues(commands.Cog):
             await ctx.send("You are not in the correct chat to call this command.")
             await ctx.message.delete()
 
+
+    @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA','student')
+    async def onDuty(self,ctx):
+        if len(self.taOnDuty) == 0:
+            await ctx.send("There are no current TAs on duty")
+        else:
+            tas = "TAs on duty:\n"
+            for ta in self.taOnDuty:
+                tas += ta.display_name + "\n"
+
+            await ctx.send(tas)
+            
+        
+    
+    @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA','students')
+    async def inQueue(self,ctx):
+        size = len(self.ohQueue)
+        await ctx.send("There are currently {} students in the queue.".format(size))
+        
     #counter to how many times people have joined 
     #first somehow get a list of everyone on the server ina  text doc
     #then everytime !join is used add an increment of sort to the students
