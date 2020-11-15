@@ -1,8 +1,9 @@
-# Author: Oliver Dininno
-# Co-Authors: Eddie Nieberdinge, Gabby Khan
+# Author(s): Oliver Dininno, Eddie Nieberding, Gabby Khan
+
+
 import discord
 from discord.ext import commands 
-
+from discord.utils import get
 class assignments(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -14,7 +15,7 @@ class assignments(commands.Cog):
 
     @commands.command(pass_context=True)
     @commands.has_any_role('Professor','TA')
-    async def add(self,ctx):
+    async def addAssignment(self,ctx):
         if ctx.message.channel.name == "instructor-commands":
             #parse out command
             if " " in ctx.message.content:
@@ -32,6 +33,11 @@ class assignments(commands.Cog):
                     #Puts embedded message in the instructor channel
                     embedVar = discord.Embed(title=assignArgs[0], description=assignArgs[2], color=0x0026ff)
                     embedVar.add_field(name="Due Date: ", value=assignArgs[1], inline=False)
+
+                    member = ctx.message.author
+                    role = get(member.guild.roles, name ="Student")
+
+                    await ctx.guild.get_channel(assignID).send(role.mention)
                     await ctx.guild.get_channel(assignID).send(embed=embedVar)
                 else:
                     await ctx.send("You are in the wrong channel idiot.", delete_after=5)
@@ -45,7 +51,7 @@ class assignments(commands.Cog):
         
     @commands.command(pass_context=True)
     @commands.has_any_role('Professor','TA')
-    async def clearAssignments(self,ctx):
+    async def clearAssignment(self,ctx):
         if ctx.message.channel.name == "instructor-commands":
             for channel in ctx.guild.channels:
                 if channel.name == "assignments":

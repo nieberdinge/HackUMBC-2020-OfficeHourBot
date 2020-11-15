@@ -1,38 +1,147 @@
-# Author: Eddie Nieberding
-# Co-Authors: Gabby Khan, Oliver Dininno
+# Author(s): Eddie Nieberding, Gabby Khan, Oliver Dininno
 import discord
 import queue
 from discord.utils import get
 from discord.ext import commands 
 
 
+FILENAME = "membersId.txt"
+RESET_DAY = "Sunday"
+DELIMITER = '|' 
+
+
+# today = date.today()
+# dateFormat = today.strftime("%m/%d/%Y")
+# ex. 12/28/99
+class Student():
+    def __init__(self,id,weekly,allTime):
+        self.id = id
+        self.weekly = weekly
+        self.allTime = allTime
+        #self.weeklyDate #reset based on the day of RESET_DAY
+
 class queues(commands.Cog):
 
     def __init__(self, client):
         self.client = client
         self.ohQueue  = [] #Holds Student member
-        self.ohMsg    = [] #Holds the message that was sent
+        self.ohMsg    = [] #Holds the message that was the bot sent
         self.taOnDuty = []
         self.data = []
-        self.priority = False
+        self.priority = False #says if it is a priority queue
     
     @commands.Cog.listener()
     async def on_ready(self):
         print("Queue cog online.")     
 
+    #Reads file
+    def updateStats(self):
+        myFile = open(FILENAME)
+        self.data = []
+        for line in myFile.readlines():
+            data = line.split(DELIMITER) 
+            #id| week count | all time count
+            self.data.append(Student(int(data[0]),int(data[1]),int(data[2])))
+        myFile.close()
+
+    def writeStats(self):
+        myFile = open(FILENAME,'w')
+        for data in self.data:
+            msg = str(data.id)+DELIMITER+str(data.weekly)+DELIMITER+str(data.allTime)
+            print(msg)
+            myFile.write(msg)
+            myFile.write(DELIMITER+"\n")
+        myFile.close()
+
+    #memberId|0|0
+    def tick(self, memberId):
+        self.updateStats()
+
+        for student in self.data:
+            if str(memberId) == str(student.id):
+                student.weekly += 1
+                student.allTime += 1
+                break
+        else:
+            self.data.append(Student(memberId,1,1))
+            
+        self.writeStats()
+            
+    def findUser(self,memberId):
+        self.updateStats()
+        for user in self.data:
+            if memberId == user.id:
+                return user
+        return -1
+
+    ## Resets weekly variable
+    @commands.command()
+    @commands.has_any_role('Professor','TA')
+    async def reset(self,ctx):
+        await ctx.send("Reset all current priority")
+        for student in self.data:
+            student.weekly = 0
+        self.writeStats()
+    # insertion sort   
+    #append unsorted ohQueue
+    def sortQueueP(self):
+        #first iterate to end of list (insertion)
+        #first check if empty, if not keep running
+
+        if self.ohQueue != [] and len(self.ohQueue) > 1:  
+            poppedItem = self.ohQueue.pop()
+            msgInsert = self.ohMsg.pop()
+            
+            # self.data -> hold all the student data
+            #findUser(memberId) -> return student obj
+            #self.ohQueue[index].id == student.id
+
+            studentArr = []
+            #converts discord members to student class
+            inserter = self.findUser(poppedItem.id)
+            for member in self.ohQueue:
+                student = self.findUser(member.id)
+                studentArr.append(student)
+
+            counter = 0
+            hasSwapped = False
+            while counter < len(self.ohQueue) and hasSwapped != True:
+                #Finds something with a bigger size
+                if studentArr[counter].weekly > inserter.weekly:
+                    self.ohQueue.insert(counter,poppedItem)
+                    hasSwapped = True
+                counter += 1 
+            
+            #if it is the largest in the queue
+            if hasSwapped == False:
+                print("I added to the back")
+                self.ohQueue.append(poppedItem)
+                self.ohMsg.append(msgInsert)
+
+            print("ohQueue",self.ohQueue)
+
+
     ## Starts Office Hours
     @commands.command(pass_context=True)
     @commands.has_any_role('Professor','TA')
-    async def startOh(self,ctx):
+    async def startOh(self,ctx,priority=""):
         if ctx.message.channel.name == "instructor-commands":
             ta = ctx.message.author
+            if priority == "priority":
+                self.priority = True
             #no one is in office hours
             if len(self.taOnDuty) == 0:
                 channel = get(ta.guild.channels,name="request")
                 embedVar = discord.Embed(title="Office hours are open!", description="Use !join [reason] to join", color=0x00ff00)
+
+                if self.priority == True:
+                    embedVar.add_field(name="Using Priority Queue System.", value = "Please be patient.", inline=False)
+                
                 await channel.send(embed=embedVar)
                 self.taOnDuty.append(ta)
                 await ctx.send("You have checked into office hours!",delete_after=5)
+                if self.priority == True:
+                    await ctx.send("*Priority Queue is active.*", delete_after=5)
             #someone else is in office hours
             elif ta not in self.taOnDuty:
                 self.taOnDuty.append(ta)
@@ -50,22 +159,26 @@ class queues(commands.Cog):
     async def endOh(self,ctx):
         if ctx.message.channel.name == "instructor-commands":
             ta = ctx.message.author
+            
             if ta in self.taOnDuty:
                 self.taOnDuty.remove(ta)
                 await ctx.send("You have checked out of office hours!", delete_after=5)
                 
                 #There are no more TAs on duty
                 if len(self.taOnDuty) == 0:
-                        channel = get(ta.guild.channels, name="request")
-                        embedVar = discord.Embed(title="Office hours are now over!", description="Please wait for a TA to open Office hours to join", color=0xff0000)
-                        await channel.send(embed=embedVar)
+                    if self.priority == True:
+                        self.priority = False
+                    channel = get(ta.guild.channels, name="request")
+                    embedVar = discord.Embed(title="Office hours are now over!", description="Please wait for a TA to open Office hours to join", color=0xff0000)
+                    await channel.send(embed=embedVar)
 
-                        #tells all students in the queue they have been removed
-                        for x in range(len(self.ohMsg)):
-                            await self.ohMsg[x].delete()
-                            await self.ohQueue[x].send("Office Hours are now closed. You have been removed from the queue.")
-                        self.ohMsg.clear()
-                        self.ohQueue.clear()
+                    #tells all students in the queue they have been removed
+                    print(self.ohQueue)
+                    for x in range(len(self.ohMsg)):
+                        await self.ohMsg[x].delete()
+                        await self.ohQueue[x].send("Office Hours are now closed. You have been removed from the queue.")
+                    self.ohMsg.clear()
+                    self.ohQueue.clear()
             else:
                 await ctx.send("You are not in office hours")
         else:
@@ -79,9 +192,11 @@ class queues(commands.Cog):
         if ctx.message.channel.name == "instructor-commands":
             ta = ctx.message.author
             if ta in self.taOnDuty:
-                message = self.ohMsg.pop(0)
                 studentMember = self.ohQueue.pop(0)
+                message = self.ohMsg.pop(0)
                 
+                if self.priority == True:
+                    self.tick(studentMember.id)
 
                 member = ctx.message.author
                 myRoles = ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
@@ -117,7 +232,6 @@ class queues(commands.Cog):
     @commands.command(pass_context=True)
     @commands.has_any_role('Professor','TA')
     async def reject(self,ctx):
-        " -Leave the queue"
         if ctx.message.channel.name == "instructor-commands":
             #!reject [Student ID] [Reason]
             msg = ctx.message.content.split()
@@ -159,9 +273,8 @@ class queues(commands.Cog):
     
     ## Allows a Student to Make a Plea for Help
     @commands.command(pass_context=True)
-    @commands.has_any_role('Professor','TA',"Students")
+    @commands.has_any_role('Professor','TA',"Student")
     async def join(self,ctx):
-        " -Join the queue"
         if ctx.message.channel.name == "request":
             if len(self.taOnDuty) > 0:
                 instructorID = ""
@@ -178,17 +291,30 @@ class queues(commands.Cog):
 
                 if ctx.message.channel.name == "request":
                     if ctx.author not in self.ohQueue:
-                        studId = ctx.message.author
-                        authID = "!reject "+str(studId.id)
-
+                        studentMember = ctx.message.author
+                        authID = "!reject "+str(studentMember.id)
+                        studentData = self.findUser(studentMember.id)
                         #Puts embedded message in the instructor channel
                         embedVar = discord.Embed(title=ctx.message.author.display_name, description=studMsg, color=0xff0000)
                         embedVar.add_field(name="To reject: ", value=authID, inline=False)
+                        if studentData != -1:
+                            embedVar.add_field(name="Current Priority: ", value=studentData.weekly, inline=True)
+                            embedVar.add_field(name="All Time OH accepts: ", value=studentData.allTime, inline=True)
+                        else:
+                            embedVar.add_field(name="Current Priority: ", value=0, inline=True)
+                            embedVar.add_field(name="All Time OH accepts: ", value=0, inline=True)
+
+
                         discordMsg = await ctx.guild.get_channel(instructorID).send(embed=embedVar)
 
                         #adds the user and msg id to the queue
-                        self.ohQueue.append(studId)
+                        self.ohQueue.append(studentMember) 
                         self.ohMsg.append(discordMsg)
+
+                        # sorts on join 
+                        if self.priority == True:
+                            self.sortQueueP()
+                        
                     else:
                         msg = "{} You are already in the queue".format(ctx.message.author.mention)
                         await ctx.send(msg,delete_after=3)
@@ -204,9 +330,8 @@ class queues(commands.Cog):
       
     ## Allows a Student to Give Up on Getting Help
     @commands.command(pass_context=True)
-    @commands.has_any_role('Professor','TA',"Students")
+    @commands.has_any_role('Professor','TA',"Student")
     async def leave(self,ctx):
-        "-Lets the student leave the queue if they would like to"
         if ctx.message.channel.name == "request":
             userId = ctx.message.author.id 
             noPosition = " You are not in the queue."
@@ -234,7 +359,7 @@ class queues(commands.Cog):
 
     ## Shows a Student Their Position in the Queue
     @commands.command(pass_context=True)
-    @commands.has_any_role('Professor','TA',"Students")
+    @commands.has_any_role('Professor','TA',"Student")
     async def position(self,ctx):
         if ctx.message.channel.name == "request":
             userId = ctx.message.author.id 
@@ -244,9 +369,9 @@ class queues(commands.Cog):
                 if self.ohQueue[x].id == userId:
                     index = x
             if index != -1:
-                await ctx.send(ctx.message.author.mention + ", you are number {} in the queue.".format(index+1))
+                await ctx.send(ctx.message.author.mention + ", you are number {} in the queue.".format(index+1), delete_after=5)
             else:
-                await ctx.send("{} you are not in the queue".format(ctx.message.author.mention))
+                await ctx.send("{} you are not in the queue".format(ctx.message.author.mention), delete_after=5)
         else:
             await ctx.send("Please move to the 'request' channel",delete_after=5)
         await ctx.message.delete()
@@ -279,7 +404,7 @@ class queues(commands.Cog):
 
 
     @commands.command(pass_context=True)
-    @commands.has_any_role('Professor','TA','student')
+    @commands.has_any_role('Professor','TA','Student')
     async def onDuty(self,ctx):
         if len(self.taOnDuty) == 0:
             await ctx.send("There are no current TAs on duty")
@@ -293,10 +418,18 @@ class queues(commands.Cog):
         
     
     @commands.command(pass_context=True)
-    @commands.has_any_role('Professor','TA','students')
+    @commands.has_any_role('Professor','TA','Student')
     async def inQueue(self,ctx):
         size = len(self.ohQueue)
         await ctx.send("There are currently {} students in the queue.".format(size))
+        if size != 0:
+            index = 1
+            students = "Current Queue:\n"
+            for stu in self.ohQueue:
+                students += str(index) + ". "+ stu.display_name + "\n"
+                index += 1
+            await ctx.send(students)
+        
         
     #counter to how many times people have joined 
     #first somehow get a list of everyone on the server ina  text doc

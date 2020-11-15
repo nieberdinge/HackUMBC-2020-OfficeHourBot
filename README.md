@@ -14,6 +14,25 @@
     This is why we wanted to create a fully integrated bot that makes everyone's
     lives easier. 
 
+## Features
+    - A self creating server
+        - Sets up permissions for Professor, Teaching Assistants, and Students
+        - Instructor only chats
+        - Student Chats
+    - Authentication for students and TAs
+        - Prevents unwatend students in the class discord
+    - A working Office Hour Queue
+        - Reject 
+        - Accept
+        - Priority Queue Option
+        - Shows the current TAs
+        - Shows the current Queue
+        - Position in the Queue
+    - Assignment command
+    - Lecture command
+        - makes a lecture with breakout groups
+    - Private One on One chat
+    - Help command that shows all the commands 
 
 ## How to Install
     Step 1: 
@@ -30,21 +49,6 @@
     6) Click on the "Copy" button under token
     7) Paste this token into the `TOKENFILE.py`
     
-
-## Features
-    - A self creating server
-        - Sets up permissions for Professor, Teaching Assistants, and Students
-    - Authentication for students
-        - Prevents unwatend students in the class discord
-    - A working Office Hour Queue
-        - Reject 
-        - Accecpt
-    - Assignment command
-    - Lecture command
-        - makes a lecture with breakout groups
-    - Help command that shows all the commands 
-    
-
 ## Video steps
     - start with new guild
     - call setup command
@@ -56,26 +60,3 @@
     - close
     - lecture
     - private
-
-## Goals
-    - pqueue
-        - startPriorityoh
-            -Does everything that q does but tracks amount of used oh time
-    - Easter Eggs
-    -Error handling 
-
-    
-## brainstorming ideas
- - General office hour bot for any class
-    What do it do???
-    - student queue
-        - priority queue
-    - Google Calendar integration (may be hard to do)
-        - google calendar api
-    - simple commands
-        - help
-    - Private one on one command
-    - easter eggs
-    - delete commands after X time
-    - echo log gonna be dank
-

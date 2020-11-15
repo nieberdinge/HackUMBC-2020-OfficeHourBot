@@ -1,5 +1,4 @@
-# Author: Oliver Dininno
-# Co-Authors: Eddie Nieberding, Gabby Khan
+# Author(s): Oliver Dininno, Eddie Nieberding, Gabby Khan
   
 import discord
 from discord.ext import commands 
@@ -20,10 +19,23 @@ class serverSetup(commands.Cog):
     # !setup
     #is_owner() at end
     @commands.command(pass_context=True)
-    @commands.is_owner()
+    #@commands.is_owner()
     async def setup(self,ctx):
-        "- Builds the server from the ground up"
         await ctx.send("Setting Up!")
+
+        myText = ctx.guild.text_channels
+        myVoice = ctx.guild.voice_channels
+        for text in myText:
+            if text.name.lower() == "general":
+                await text.delete()
+        for voice in myVoice:
+            if text.name.lower() == "general":
+                await text.delete()
+        myCategories = ctx.guild.categories
+        for cat in myCategories:
+            if text.name.lower() == "text channels" or text.name.lower() == "voice channels":
+                await text.delete()
+
         studentTxtChannels = [ ("hangout", "general discussion"),
                             ("request", "Request help from an instructor, use !request_help for more info"), 
                             ("questions", "Ask general questions for peers or instructors to answer."),
@@ -94,6 +106,7 @@ class serverSetup(commands.Cog):
                 await newCat.set_permissions(role,read_messages=False)
         channel = await newCat.create_text_channel("authenticate-here")
         await channel.edit(topic = "!authMe [code from instructor]")
+        await channel.send("```!authMe [code from instructor]```to ")
         
         
         myCategories = ctx.guild.categories
@@ -116,19 +129,19 @@ class serverSetup(commands.Cog):
         for studChannel in studentVcChannels:
             channel = await myCategories[1].create_voice_channel(studChannel)
 
+ 
+
+
     
     @commands.command(pass_context=True)
-    @commands.has_any_role('Professor')
+    #@commands.is_owner()
     async def delete(self,ctx):
-        "- Will purge the entire server"
         myText = ctx.guild.text_channels
         myVoice = ctx.guild.voice_channels
         for text in myText:
-            if text.name != "general":
-                await text.delete()
+            await text.delete()
         for voice in myVoice:
-            if voice.name != "general":
-                await voice.delete()
+            await voice.delete()
 
         myCategories = ctx.guild.categories
         for cat in myCategories:

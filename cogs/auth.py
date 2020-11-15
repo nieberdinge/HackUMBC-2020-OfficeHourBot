@@ -1,3 +1,4 @@
+#Author(s): Eddie Nieberding
   
 import discord
 from discord.ext import commands 
