@@ -31,6 +31,39 @@
     7) Paste this token into the `TOKENFILE.py`
     
 
+## Features
+    - A self creating server
+        - Sets up permissions for Professor, Teaching Assistants, and Students
+    - Authentication for students
+        - Prevents unwatend students in the class discord
+    - A working Office Hour Queue
+        - Reject 
+        - Accecpt
+    - Assignment command
+    - Lecture command
+        - makes a lecture with breakout groups
+    - Help command that shows all the commands 
+    
+
+## Video steps
+    - start with new guild
+    - call setup command
+    - show authenticate
+    - show office hours
+        - join
+        - accept
+        - reject
+    - close
+    - lecture
+    - private
+
+## Goals
+    - pqueue
+        - startPriorityoh
+            -Does everything that q does but tracks amount of used oh time
+    - Easter Eggs
+    -Error handling 
+
     
 ## brainstorming ideas
  - General office hour bot for any class
@@ -39,26 +72,10 @@
         - priority queue
     - Google Calendar integration (may be hard to do)
         - google calendar api
-    - Set up a discord server - starting from a fresh server
-        - From ground up set up a discord server
-        - Text Channels:
-            - student-general
-            - student-waitroom
-            - student-request
-            - staff-general
-            - staff-commands
-            - faq
-        - Voice Channels:
-            - hangout
-            - staff-hangout (hidden)
-            - office-hours (hidden)
-    - Assignment list 
-        - due dates 
-        - own cog
     - simple commands
         - help
-    - FAQ
     - Private one on one command
     - easter eggs
     - delete commands after X time
     - echo log gonna be dank
+

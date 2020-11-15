@@ -38,16 +38,6 @@ class authenticator(commands.Cog):
             await ctx.send("You need to be in the authenticate-here channel",delete_after=5)
         await ctx.message.delete()
     
-    @commands.command()
-    @commands.has_role("Professor")
-    async def makeCodes(self,ctx):
-        file = open("studentList.txt",'w')
-        
-        for line in file.readlines():
-            file.write(line[:-1]+"|"+self.generate())
-        
-        file.close()
-
     #generates a random code
     def generate(self):
         letters = string.ascii_uppercase

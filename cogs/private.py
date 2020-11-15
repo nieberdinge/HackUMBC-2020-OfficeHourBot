@@ -21,54 +21,36 @@ class Private(commands.Cog):
     @commands.has_any_role('Professor','TA')
     async def private (self,ctx):
         "sets up a Private One on One Session"
-        member = ctx.message.author
-        myRoles = ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
-
         if ctx.message.channel.name == "instructor-commands":
-            #creates objects of each role for easy access
-            profRole = get(member.guild.roles, name="Professor")
-            taRole = get(member.guild.roles, name="TA")
-            stuRole = get(member.guild.roles, name="Student")
-            everyRole = get(member.guild.roles, name="@everyone")
+            member = ctx.message.author
+            myRoles = ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
 
-            PVcChannel = "Private One on One"
-            newCategory = await ctx.guild.create_category("Private")
-            TC = await newCategory.create_text_channel("private-chat")
-            await TC.send("Welcome to your own private session. You can drag students from a voice chat into the private-chat")
-            await TC.send("To close this session, use !close")
-            channel = await newCategory.create_voice_channel("private-chat")
-            await newCategory.set_permissions(stuRole,read_messages=False)
-            await newCategory.set_permissions(everyRole,read_messages=False)
-            await newCategory.set_permissions(taRole,read_messages=True)
-            await newCategory.set_permissions(profRole,read_messages=True)
+            if ctx.message.channel.name == "instructor-commands":
+                #creates objects of each role for easy access
+                profRole = get(member.guild.roles, name="Professor")
+                taRole = get(member.guild.roles, name="TA")
+                stuRole = get(member.guild.roles, name="Student")
+                everyRole = get(member.guild.roles, name="@everyone")
+
+                PVcChannel = "Private One on One"
+                newCategory = await ctx.guild.create_category("Private")
+                TC = await newCategory.create_text_channel("private-chat")
+                await TC.send("Welcome to your own private session. You can drag students from a voice chat into the private-chat")
+                await TC.send("To close this session, use !close")
+                channel = await newCategory.create_voice_channel("private-chat")
+                await newCategory.set_permissions(stuRole,read_messages=False)
+                await newCategory.set_permissions(everyRole,read_messages=False)
+                await newCategory.set_permissions(taRole,read_messages=True)
+                await newCategory.set_permissions(profRole,read_messages=True)
+            else:
+                studentID = ctx.message.author.id
+                studMsg = "Please only do this command in instructor-commands"
+                guildId = await ctx.guild.fetch_member(studentID)
+                await guildId.send(studMsg)
         else:
-            studentID = ctx.message.author.id
-            studMsg = "Please only do this command in instructor-commands"
-            guildId = await ctx.guild.fetch_member(studentID)
-            await guildId.send(studMsg)
-
-    @commands.command(pass_context=True)
-    @commands.has_any_role('Professor','TA')
-    async def closeP (self,ctx):
-        "Closes Private 1 on 1 Channel"
-    # need to check that it is instructor/TA deleting
-    # check that the VC is a one on one channel
-        member = ctx.message.author
-        vc = member.voice.channel
-        closeCat = get(member.guild.categories, id = vc.category_id)
-        if vc.name == "private-chat":
-            await closeCat.delete()
-            await vc.delete()
+            await ctx.send("Please move to the 'instructor-commands' channel",delete_after=5)
+            await ctx.message.delete()
             
-        else: 
-        #else DM the instructor that they cant close unless in the channel
-            studentID = ctx.message.author.id
-            studMsg = "You cannot delete the chat (you must be in it to delete)"
-            guildId = await ctx.guild.fetch_member(studentID)
-            await guildId.send(studMsg)
-
-   
-
 def setup(client):
     client.add_cog(Private(client))
 
