@@ -35,7 +35,7 @@ class help(commands.Cog):
             embedVar.add_field(name="!beginLecture [Number of Breakout Rooms (optional)]", 
                                 value = " -Begins a lecture and creates rooms if applicable",inline=False)
             embedVar.add_field(name="!endLecture", value="Removes the lecture chat and breakout groups",inline=False)
-            discordMsg = await ctx.send(embed=embedVar)
+            await ctx.send(embed=embedVar)
 
 
         if category.name == "Students" or category.name == "Instructors":
@@ -45,7 +45,7 @@ class help(commands.Cog):
             embedVar.add_field(name="!position", value=" -Shows student their postion in queue", inline=False)
             embedVar.add_field(name="!onDuty", value=" -shows who the current TA's on duty are", inline=False)
             embedVar.add_field(name="!inQueue", value=" -Shows the current queue of students", inline=False)
-            discordMsg = await ctx.send(embed=embedVar)
+            await ctx.send(embed=embedVar)
             
         if category.name == "Authentication":
             await ctx.send("```!authMe [class code]``` to be authorized. (Code provided by professor)")

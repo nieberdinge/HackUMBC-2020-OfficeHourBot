@@ -127,12 +127,14 @@ class queues(commands.Cog):
     async def startOh(self,ctx,priority=""):
         if ctx.message.channel.name == "instructor-commands":
             ta = ctx.message.author
+            color = 0x00ff00
             if priority == "priority":
                 self.priority = True
+                color = 0xff00ff
             #no one is in office hours
             if len(self.taOnDuty) == 0:
                 channel = get(ta.guild.channels,name="request")
-                embedVar = discord.Embed(title="Office hours are open!", description="Use !join [reason] to join", color=0x00ff00)
+                embedVar = discord.Embed(title="Office hours are open!", description="Use !join [reason] to join", color=color)
 
                 if self.priority == True:
                     embedVar.add_field(name="Using Priority Queue System.", value = "Please be patient.", inline=False)
@@ -193,13 +195,13 @@ class queues(commands.Cog):
             ta = ctx.message.author
             if ta in self.taOnDuty:
                 studentMember = self.ohQueue.pop(0)
-                message = self.ohMsg.pop(0)
+                self.ohMsg.pop(0)
                 
                 if self.priority == True:
                     self.tick(studentMember.id)
 
                 member = ctx.message.author
-                myRoles = ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
+                ctx.guild.roles #[Everyone, Limbo, Student, TA, Professor, HACKER!!, BOT]
 
                 #creates objects of each role for easy access
                 profRole = get(member.guild.roles, name="Professor")
@@ -220,7 +222,7 @@ class queues(commands.Cog):
                 await newCategory.set_permissions(profRole, read_messages=True)
 
                 TC = await newCategory.create_text_channel("{} Text Chat".format(studentMember.display_name))
-                VC = await newCategory.create_voice_channel("Session Voice Chat".format(studentMember.display_name))
+                await newCategory.create_voice_channel("Session Voice Chat")
                 await TC.send("{} and {}, time to figure out those bugs! Use !close to end the session.".format(studentMember.mention,ta.mention ))
             else:
                 await ctx.send("You are not in office hours")
@@ -240,7 +242,6 @@ class queues(commands.Cog):
             else:
                 if ctx.message.channel.name == "instructor-commands":
                     studentID = int(msg[1])
-                    noPosition = " You are not in the queue."
                     index = -1
                     #looks through queue to find student
                     for x in range(len(self.ohQueue)):
@@ -257,7 +258,6 @@ class queues(commands.Cog):
                         studMsg = "you are being removed from the queue for the reason:\n"+msg
 
                         #message returns user not other thing
-                        memId = self.ohQueue[index]
                         guildId = await ctx.guild.fetch_member(studentID)
                         await guildId.send(studMsg)
 
@@ -286,8 +286,6 @@ class queues(commands.Cog):
                 for channel in ctx.guild.channels:
                     if channel.name == "instructor-commands":
                         instructorID = channel.id
-                    if channel.name == "request":
-                        studentID = channel.id
 
                 if ctx.message.channel.name == "request":
                     if ctx.author not in self.ohQueue:
@@ -333,8 +331,7 @@ class queues(commands.Cog):
     @commands.has_any_role('Professor','TA',"Student")
     async def leave(self,ctx):
         if ctx.message.channel.name == "request":
-            userId = ctx.message.author.id 
-            noPosition = " You are not in the queue."
+            userId = ctx.message.author.id
             index = -1
             for x in range(len(self.ohQueue)):
                 if self.ohQueue[x].id == userId:
@@ -363,7 +360,6 @@ class queues(commands.Cog):
     async def position(self,ctx):
         if ctx.message.channel.name == "request":
             userId = ctx.message.author.id 
-            noPosition = " You are not in the queue."
             index = -1
             for x in range(len(self.ohQueue)):
                 if self.ohQueue[x].id == userId:

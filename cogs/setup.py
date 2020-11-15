@@ -29,11 +29,11 @@ class serverSetup(commands.Cog):
             if text.name.lower() == "general":
                 await text.delete()
         for voice in myVoice:
-            if text.name.lower() == "general":
+            if voice.name.lower() == "general":
                 await text.delete()
         myCategories = ctx.guild.categories
         for cat in myCategories:
-            if text.name.lower() == "text channels" or text.name.lower() == "voice channels":
+            if cat.name.lower() == "text channels" or text.name.lower() == "voice channels":
                 await text.delete()
 
         studentTxtChannels = [ ("hangout", "general discussion"),
