@@ -13,6 +13,7 @@ class assignments(commands.Cog):
 
 
     @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA')
     async def add(self,ctx):
         #"!addAssignment 'name'; 'date'; 'description'
         #!addAssignment name: Proj1  - 11/14/20  desc: Create a bot
@@ -42,6 +43,7 @@ class assignments(commands.Cog):
             await ctx.message.delete()
         
     @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA')
     async def purgeAssign(self,ctx):
         for channel in ctx.guild.channels:
             if channel.name == "assignments":

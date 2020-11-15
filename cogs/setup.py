@@ -118,6 +118,7 @@ class serverSetup(commands.Cog):
 
     
     @commands.command(pass_context=True)
+    @commands.has_any_role('Professor')
     async def delete(self,ctx):
         "- Will purge the entire server"
         myText = ctx.guild.text_channels
@@ -137,39 +138,6 @@ class serverSetup(commands.Cog):
         for role in myRoles:
             if role.name in str(serverRoles):
                 await role.delete()
-
-
-    @commands.command(pass_context=True)
-    async def perms(self,ctx):
-        "test"
-        await ctx.send("Setting up permissions!")
-        myRoles = ctx.guild.roles #[Everyone, Student, TA, Professor, HACKER!!, BOT]
-
-        profPerms = discord.Permissions()
-        profPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, administrator=True, manage_channels=True, 
-                        manage_guild=True, add_reactions=True,view_audit_log=True, stream=True, read_messages=True, send_messages=True,
-                        send_tts_messages=True, manage_messages=True, embed_links=True, attach_files=True, read_message_history=True,
-                        mention_everyone=True,connect=True, speak=True,mute_members=True,deafen_members=True, move_members=True, 
-                        change_nickname=True, manage_nicknames=True, manage_roles=True,manage_permisson=True, use_external_emojis=True,
-                        manage_emojis=True)
-        
-        await myRoles[3].edit(permissions = profPerms, hoist=True, color = 0xf74639)
-
-        taPerms = discord.Permissions()
-        taPerms.update(create_instant_invite = True,kick_members=True, ban_members=True, add_reactions=True, view_audit_log=True, 
-                        stream=True, read_messages=True, send_messages=True, send_tts_messages=True, manage_messages=True, 
-                        embed_links=True, attach_files=True, read_message_history=True,mention_everyone=True,connect=True, speak=True,
-                        mute_members=True,deafen_members=True, move_members=True, change_nickname=True, manage_nicknames=True, manage_roles=True,
-                        use_external_emojis=True,manage_emojis=True)
-
-        await myRoles[2].edit(permissions=taPerms, hoist=True, color = 0x0ce81a)
-
-        stuPerms = discord.Permissions()
-        stuPerms.update(add_reactions=True, stream=True, read_messages=True, send_messages=True, send_tts_messages=True,
-                        embed_links=True, attach_files=True, mention_everyone=True,connect=True, speak=True, 
-                        change_nickname=True,use_external_emojis=True)
-        await myRoles[1].edit(permissions=stuPerms,hoist=True, color = 0x3583f0)
-
 
 
 def setup(client):

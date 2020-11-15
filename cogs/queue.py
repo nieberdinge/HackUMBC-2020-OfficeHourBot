@@ -19,6 +19,7 @@ class queues(commands.Cog):
         print("Queue cog online.")
 
     @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA',"Students")
     async def join(self,ctx):
         " -Join the queue"
         if len(self.taOnDuty) > 0:
@@ -92,6 +93,7 @@ class queues(commands.Cog):
 
 
     @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA',"Students")
     async def position(self,ctx):
         "-Returns the position that you are in"
         noPosition = " You are not in the queue."
@@ -106,6 +108,7 @@ class queues(commands.Cog):
 
 
     @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA',"Students")
     async def leave(self,ctx):
         "-Lets the student leave the queue if they would like to"
         noPosition = "You are not in the queue."
@@ -210,9 +213,10 @@ class queues(commands.Cog):
             await ctx.send("You are not in office hours")
 
     @commands.command(pass_context=True)
+    @commands.has_any_role('Professor','TA')
     async def close(self,ctx):
 
-        untouchable = ["Instructors","Students","Authentication"]
+        untouchable = ["Instructors","Students","Authentication","Lecture"]
         message = ctx.message
         textChannel = message.channel
         categoryId = textChannel.category_id
