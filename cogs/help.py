@@ -50,7 +50,9 @@ class help(commands.Cog):
         if category.name == "Authentication":
             await ctx.send("```!authMe [class code]``` to be authorized. (Code provided by professor)")
        
-
+    @commands.command(pass_context=True)    
+    async def octoCat(self,ctx):
+        await ctx.send(file=discord.File('Octocatgif.gif'))
 
 def setup(client):
     client.add_cog(help(client))
