@@ -91,34 +91,35 @@ class queues(commands.Cog):
         if self.ohQueue != [] and len(self.ohQueue) > 1:  
             poppedItem = self.ohQueue.pop()
             msgInsert = self.ohMsg.pop()
-            
-            # self.data -> hold all the student data
-            #findUser(memberId) -> return student obj
-            #self.ohQueue[index].id == student.id
 
             studentArr = []
             #converts discord members to student class
             inserter = self.findUser(poppedItem.id)
-            for member in self.ohQueue:
-                student = self.findUser(member.id)
-                studentArr.append(student)
+            print("insterter: " + str(inserter))
+            if inserter == -1:
+                self.ohQueue.insert(0,poppedItem)
+                self.ohMsg.insert(0,msgInsert)
 
-            counter = 0
-            hasSwapped = False
-            while counter < len(self.ohQueue) and hasSwapped != True:
-                #Finds something with a bigger size
-                if studentArr[counter].weekly > inserter.weekly:
-                    self.ohQueue.insert(counter,poppedItem)
-                    hasSwapped = True
-                counter += 1 
-            
-            #if it is the largest in the queue
-            if hasSwapped == False:
-                print("I added to the back")
-                self.ohQueue.append(poppedItem)
-                self.ohMsg.append(msgInsert)
+            else:
+                for member in self.ohQueue:
+                    student = self.findUser(member.id)
+                    studentArr.append(student)
 
-            print("ohQueue",self.ohQueue)
+                counter = 0
+                hasSwapped = False
+                while counter < len(self.ohQueue) and hasSwapped != True:
+                    #Finds something with a bigger size
+                    print(studentArr[counter])
+                    if studentArr[counter].weekly > inserter.weekly:
+                        self.ohQueue.insert(counter,poppedItem)
+                        hasSwapped = True
+                    counter += 1 
+                
+                #if it is the largest in the queue
+                if hasSwapped == False:
+                    self.ohQueue.append(poppedItem)
+                    self.ohMsg.append(msgInsert)
+
 
 
     ## Starts Office Hours

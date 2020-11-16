@@ -106,7 +106,7 @@ class serverSetup(commands.Cog):
                 await newCat.set_permissions(role,read_messages=False)
         channel = await newCat.create_text_channel("authenticate-here")
         await channel.edit(topic = "!authMe [code from instructor]")
-        await channel.send("```!authMe [code from instructor]```to ")
+        await channel.send("```!authMe [code from instructor]```Use code provided by your professsor")
         
         
         myCategories = ctx.guild.categories
